@@ -2,9 +2,7 @@
 name: Java CI with Gradle
 
 on:
-#  push:
-#    branches: [ main ]
-  pull_request:
+  push:
     branches: [ main ]
   workflow_dispatch:
     
@@ -13,9 +11,6 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
-
-    outputs:
-      jar-version: ${{ steps.extract-version.outputs.version }}
 
     steps:
     - uses: actions/checkout@v2
@@ -41,14 +36,7 @@ jobs:
 
     - name: Build with Gradle
       run: ./gradlew --info -Pversion=2.0 cleanTest build
-      
-    - name: extract version
-      id: extract-version
-      run: "echo ::set-output name=version::$( ./gradlew properties | sed -n -e 's/^version: \\(.*\\)$/\\1/p' )"
-      
-    - run: ls -al build/test-results/test
-      shell: bash
-      
+            
     - name: Publish Unit Test Results
       uses: EnricoMi/publish-unit-test-result-action@v1.19
       if: always()
@@ -56,28 +44,3 @@ jobs:
         files: build/test-results/test/*.xml
         LOG_LEVEL: DEBUG
         ROOT_LOG_LEVEL: DEBUG      
-
-
-#    - uses: dorny/test-reporter@v1.5.0
-#      with:
-#        artifact: test-results              # artifact name
-#        name: JUnit Tests                   # Name of the check run which will be created
-#        path: '**/build/test-results/test/TEST-*.xml'
-#        reporter: java-junit                # Format of test results
-        
-#  deploy:
-#    needs:
-#     - build
-#    runs-on: ubuntu-latest
-#    environment: develop
-#    steps:
-#      - run: echo "deploying version ${{needs.build.outputs.jar-version}} using key ${{secrets.DEPLOY_KEY}}"
-
-#  integration-test:
-#    needs:
-#     - deploy
-#    runs-on: ubuntu-latest
-#    steps:
-#      - run: echo "running tests"
-      
-  
